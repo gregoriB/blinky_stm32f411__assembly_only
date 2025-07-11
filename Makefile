@@ -6,8 +6,8 @@ SRC_DIR   := src
 LD_DIR    := ld
 BUILD_DIR := build
 
-CFLAGS    := -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -nostdlib -ffreestanding
-LDFLAGS   := -nostdlib -Wl,--gc-sections
+CFLAGS    := -g -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O0 -nostdlib -ffreestanding
+LDFLAGS   := -g -nostdlib -Wl,--gc-sections
 INCLUDES  := -Iinclude
 
 BOOT_SRC  := $(SRC_DIR)/bootloader.S

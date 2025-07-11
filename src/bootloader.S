@@ -8,6 +8,8 @@ _isr_vector:
     .word _estack
     .word Reset_Handler
 
+.section .text
+
 .global Reset_Handler
 .type Reset_Handler, %function
 
@@ -22,8 +24,8 @@ Reset_Handler:
     ldr   r1, [r0, #4]      // load in main firmware entrypoint 
     bx    r1                // jump to main firmware
 
-    b     .                 // should be unreachable
+    b     hang              // should be unreachable
 
-.section .stack
-.space 0x400
-_estack:
+
+hang:
+    b     hang

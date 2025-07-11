@@ -1,3 +1,5 @@
+#include "constants.S"
+
 .syntax unified
 .cpu cortex-m4
 .thumb
@@ -16,15 +18,15 @@ _isr_vector:
 Reset_Handler:
     ldr   r0, =_estack
     msr   msp, r0
-    ldr   r0, =0x08004000   // main firmware
+    ldr   r0, =MAIN_APP
 
     ldr   r1, [r0]
-    msr   msp, r1           // set main stack pointer to main firmware
+    msr   msp, r1                                   // set main stack pointer to main firmware
 
-    ldr   r1, [r0, #4]      // load in main firmware entrypoint 
-    bx    r1                // jump to main firmware
+    ldr   r1, [r0, #MAIN_APP_ENTRY_OFFSET]          // load in main firmware entrypoint 
+    bx    r1                                        // jump to main firmware
 
-    b     hang              // should be unreachable
+    b     hang                                      // should be unreachable
 
 
 hang:

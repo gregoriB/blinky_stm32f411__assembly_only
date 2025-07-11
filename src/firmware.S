@@ -32,8 +32,8 @@ init_gpioc:
 
     ldr   r0, =GPIOC_BASE                           
     ldr   r1, [r0, #GPIOC_MODER_OFFSET]             // gpioc_moder 
-    bic   r1, r1, #(0b11 << 26)                     // clear mode bits for pin 13 
-    orr   r1, r1, #(0b01 << 26)                     // set pin 13 as output 
+    bic   r1, r1, #(BITS_2 << 26)                   // clear mode bits for pin 13 
+    orr   r1, r1, #(GPIOC_MODER_GP << 26)           // set pin 13 as output 
     str   r1, [r0, #GPIOC_MODER_OFFSET]
 
     bx    lr
@@ -69,7 +69,7 @@ init_clock:
     bic   r1, r1, r2                                // plln rest 9 bits
     orr   r1, r1, #(192 << 6)                       // set plln
     bic   r1, r1, #(BITS_2 << 16)                   // clear pllp
-    orr   r1, r1, #(0b00 << 16)                     // set plln, plln = 2
+    orr   r1, r1, #(RCC_PLLCRGR_PLLN_2 << 16)       // set plln, plln = 2
     bic   r1, r1, #(1 << 22)                        // clear pllsrc
     str   r1, [r0, #RCC_PLLCRGR_OFFSET]
 
@@ -107,22 +107,22 @@ init_clock:
 
 led_on:
     ldr   r0, =GPIOC_BASE
-    mov   r1, #(1 << (13 + 16))                     // led pulled low to enable
+    mov   r1, #(1 << GPIOC_PIN_13_LOW)              // led pulled low to enable
     str   r1, [r0, #GPIOC_BSRR_OFFSET]
 
     bx    lr
 
 led_off:
     ldr   r0, =GPIOC_BASE
-    mov   r1, #(1 << (13))                           // led pulled high to disable
+    mov   r1, #(1 << GPIOC_PIN_13_HIGH)             // led pulled high to disable
     str   r1, [r0, #GPIOC_BSRR_OFFSET]
 
     bx    lr
 
 led_toggle:
     ldr  r0, =GPIOC_BASE
-    ldr  r1, [r0, #0x14]                            // read gpioc_odr 
-    eor  r1, r1, #(1 << 13)                         // toggle bit 13 
+    ldr  r1, [r0, #GPIOC_ODR_OFFSET]                // read gpioc_odr 
+    eor  r1, r1, #(1 << GPIOC_PIN_13_HIGH)          // toggle bit 13 
     str  r1, [r0, #GPIOC_ODR_OFFSET]                // write back new odr 
 
     bx   lr

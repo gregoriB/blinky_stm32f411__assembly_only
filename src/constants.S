@@ -11,7 +11,8 @@
 .equ RCC_AHB1ENR_OFFSET,        0x30 
 .equ RCC_CR_OFFSET,             0x00
 .equ RCC_PLLCRGR_OFFSET,        0x04
-.equ RCC_PLLCRGR_PLLN_2,        0b00
+.equ RCC_PLLCRGR_PLLN_MAX_VAL,  0xC0
+.equ RCC_PLLCRGR_PLLN_MIN_DIV,  0b00
 .equ RCC_CFGR_OFFSET,           0x08
 .equ RCC_CFGR_SW_PLL,           0x2
 .equ RCC_CFGR_SWS_STATE,        0x2

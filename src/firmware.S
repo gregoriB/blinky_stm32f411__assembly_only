@@ -67,9 +67,9 @@ init_clock:
 
     ldr   r2, =BITS_9
     bic   r1, r1, r2                                // plln rest 9 bits
-    orr   r1, r1, #(192 << 6)                       // set plln
+    orr   r1, r1, #(RCC_PLLCRGR_PLLN_MAX_VAL << 6)  // set plln
     bic   r1, r1, #(BITS_2 << 16)                   // clear pllp
-    orr   r1, r1, #(RCC_PLLCRGR_PLLN_2 << 16)       // set plln, plln = 2
+    orr   r1, r1, #(RCC_PLLCRGR_PLLN_MIN_DIV << 16) // set plln, plln = 2
     bic   r1, r1, #(1 << 22)                        // clear pllsrc
     str   r1, [r0, #RCC_PLLCRGR_OFFSET]
 

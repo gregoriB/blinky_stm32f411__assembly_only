@@ -86,7 +86,7 @@ init_clock:
     str   r1, [r0, #FLASH_ACR_OFFSET]
 
     check_pll_on:
-        ldr   r1, [r0, #FLASH_ACR_OFFSET]
+        ldr   r1, [r0, #RCC_CR_OFFSET]
         tst   r1, #(1 << 25)
         beq   check_pll_on                          // pllrdy == 0
 

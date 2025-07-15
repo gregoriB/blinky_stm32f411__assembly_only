@@ -1,6 +1,7 @@
 .equ MAIN_APP,                  0x08004000
 .equ MAIN_APP_ENTRY_OFFSET,     0x4
-.equ DELAY_CYCLES,              48000000
+.equ DELAY_CYCLES,              (16000000 - 1)
+.equ DELAY_MULTIPLIER,          0x6
 
 .equ BITS_2,                    0x3
 .equ BITS_4,                    0xF
@@ -29,3 +30,6 @@
 .equ FLASH_ACR_OFFSET,          0x00
 .equ FLASH_ACR_LATENCY_96MHZ,   0x3
 
+.equ SYST_CSR,                  0xE000E010
+.equ SYST_RVR,                  0xE000E014
+.equ SYST_CVR,                  0xE000E018

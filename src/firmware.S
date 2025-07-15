@@ -81,9 +81,9 @@ init_clock:
     str   r1, [r2, #FLASH_ACR_OFFSET]
 
     /* enable pll */
-    ldr   r1, [r0, #FLASH_ACR_OFFSET]
+    ldr   r1, [r0, #RCC_CR_OFFSET]
     orr   r1, r1, #(1 << 24)                        // set pllon
-    str   r1, [r0, #FLASH_ACR_OFFSET]
+    str   r1, [r0, #RCC_CR_OFFSET]
 
     check_pll_on:
         ldr   r1, [r0, #RCC_CR_OFFSET]
@@ -119,6 +119,7 @@ led_off:
 
     bx    lr
 
+
 led_toggle:
     ldr  r0, =GPIOC_BASE
     ldr  r1, [r0, #GPIOC_ODR_OFFSET]                // read gpioc_odr 
@@ -128,17 +129,47 @@ led_toggle:
     bx   lr
 
 
+delay_1s:
+    mov  r2, #DELAY_MULTIPLIER
+
+    outer:
+        subs    r2, r2, #1                          
+        blt     done                                // r2 == 0
+
+    /* check current cycle - systick is only 24 bits, so can't do full 96mhz */
+    init_systick:
+        /* update delay value */
+        ldr  r0, =SYST_RVR
+        ldr  r1, =DELAY_CYCLES                      // 16000000 - 1
+        str  r1, [r0]
+
+        /* clean up cvr */
+        ldr  r0, =SYST_CVR                          // clear current value
+        mov  r1, #0
+        str  r1, [r0]
+
+        /* set csr flags */
+        ldr  r0, =SYST_CSR
+        mov  r1, #(1 << 0 | 1 << 2)                 // enable and set source to processor clock
+        str  r1, [r0]
+
+    /* check if systick countdown finished */
+    inner:
+        ldr   r1, [r0]
+        tst   r1, #(1 << 16)
+        beq   inner                                 // r1 == 0
+
+        b     outer
+
+    done:
+        bx lr
+        
+
 blink:
-    ldr  r1, =DELAY_CYCLES
+    bl  led_toggle
+    bl  delay_1s
 
-    /* delay and then toggle the led */
-    delay:
-        subs r1, r1, #1
-        bne  delay                                  // r1 value != 0
-
-        bl    led_toggle
-
-    b     blink
+    b   blink
 
 
 hang:

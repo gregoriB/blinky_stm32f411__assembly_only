@@ -8,8 +8,10 @@
 .global _isr_vector
 _isr_vector:
     .word _estack_main
-    .thumb_func
     .word Reset_Handler_main
+    .space (15 - 2) * 4, 0                          // entries 2 to 14
+    .word systick_handler                           // add systick handler to entry 15
+
 
 .section .text
 
@@ -19,10 +21,21 @@ Reset_Handler_main:
     ldr   r0, =_estack_main
     msr   msp, r0
 
+    bl    init_vector_table
     bl    init_gpioc
     bl    init_clock
     bl    blink
+    
     b     hang
+
+
+init_vector_table:
+    ldr   r0, =0xE000ED08                           // load address of vtor
+    ldr   r1, =0x08004000                           // load vector table base address
+    str   r1, [r0]                                  // write vector table address to vtor
+
+    cpsie I                                         // enable interrupts
+
 
 init_gpioc:
     ldr   r0, =RCC_BASE                         
@@ -37,6 +50,7 @@ init_gpioc:
     str   r1, [r0, #GPIOC_MODER_OFFSET]
 
     bx    lr
+
 
 init_clock:
     ldr   r0, =RCC_BASE                        
@@ -112,6 +126,7 @@ led_on:
 
     bx    lr
 
+
 led_off:
     ldr   r0, =GPIOC_BASE
     mov   r1, #(1 << GPIOC_PIN_13_HIGH)             // led pulled high to disable
@@ -129,48 +144,74 @@ led_toggle:
     bx   lr
 
 
-delay_1s:
-    mov  r2, #DELAY_MULTIPLIER
+/*
+ * Since systick only supports a 24byte delay, and thus a 16.777Mhz cycle rate,
+ * The full count must be run 6 times to get a 96Mhz delay before doing an LED toggle
+ */
+.type systick_handler, %function
+.global systick_handler
+systick_handler:
+    push    {lr}
 
-    outer:
-        subs    r2, r2, #1                          
-        blt     done                                // r2 == 0
+    /*  decrement and check current iterations
+        reset and toggle if iterations <= 0, 
+        otherwise store iteration and end */
+    ldr  r0, =current_iteration                  
+    ldr  r1, [r0]                                // current count
+    subs r1, r1, #1                              // decrement iterations counter                    
 
-    /* check current cycle - systick is only 24 bits, so can't do full 96mhz */
-    init_systick:
-        /* update delay value */
-        ldr  r0, =SYST_RVR
-        ldr  r1, =DELAY_CYCLES                      // 16000000 - 1
+    cmp  r1, #0                                
+    blt  reset                                   // iterations <= 0
+
+    str  r1, [r0]                               
+    bl   systick_handler_done
+
+    reset:
+        /* reset iterations to max_iterations and toggle led */
+        ldr  r2, =max_iterations
+        ldr  r1, [r2]
         str  r1, [r0]
+        bl   led_toggle
 
-        /* clean up cvr */
-        ldr  r0, =SYST_CVR                          // clear current value
-        mov  r1, #0
-        str  r1, [r0]
+    systick_handler_done:
+        pop  {lr}
+        bx   lr
 
-        /* set csr flags */
-        ldr  r0, =SYST_CSR
-        mov  r1, #(1 << 0 | 1 << 2)                 // enable and set source to processor clock
-        str  r1, [r0]
 
-    /* check if systick countdown finished */
-    inner:
-        ldr   r1, [r0]
-        tst   r1, #(1 << 16)
-        beq   inner                                 // r1 == 0
+init_systick:
+    /* update delay value */
+    ldr  r0, =SYST_RVR
+    ldr  r1, =DELAY_CYCLES                           // 16000000 - 1
+    str  r1, [r0]
 
-        b     outer
+    /* clean up cvr */
+    ldr  r0, =SYST_CVR                               // clear current value
+    mov  r1, #0
+    str  r1, [r0]
 
-    done:
-        bx lr
-        
+    /* set csr flags */
+    ldr  r0, =SYST_CSR
+    mov  r1, #(1 << 0 | 1 << 1 | 1 << 2)             // enable and set source to processor clock
+    str  r1, [r0]
+
+    bx  lr
+
 
 blink:
-    bl  led_toggle
-    bl  delay_1s
-
-    b   blink
+    /* setup systick to interrupt and toggle led at regular timed intervals */
+    bl  init_systick
 
 
 hang:
-    bl     hang
+    b   hang
+
+
+.global current_iteration_default
+.section .rodata             
+max_iterations:       
+  .word 6               // (96Mhz / 6) == 16Mhz
+
+.global current_iteration 
+.section .data             
+current_iteration:       
+  .word max_iterations

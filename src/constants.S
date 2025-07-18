@@ -1,12 +1,11 @@
 .equ MAIN_APP,                  0x08004000
 .equ MAIN_APP_ENTRY_OFFSET,     0x4
 .equ DELAY_CYCLES,              (16000000 - 1)
-.equ DELAY_MULTIPLIER,          0x6
 
 .equ BITS_2,                    0x3
 .equ BITS_4,                    0xF
 .equ BITS_9,                    0x7FC0
-.equ BITS_63,                   0x3F
+.equ BITS_6,                    0x3F
 
 .equ RCC_BASE,                  0x40023800  
 .equ RCC_AHB1ENR_OFFSET,        0x30 
@@ -33,3 +32,5 @@
 .equ SYST_CSR,                  0xE000E010
 .equ SYST_RVR,                  0xE000E014
 .equ SYST_CVR,                  0xE000E018
+
+.equ VTOR,                      0xE000ED08

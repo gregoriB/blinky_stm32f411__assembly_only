@@ -14,6 +14,6 @@ make && make flash
 
 ### Description
 
-Uses a bootloader to load in the actual firmware because otherwise power-cycling and reset does not run the program.
+Uses a bootloader to load in the actual firmware, otherwise power-cycling and reset will not run the program.
 
-Currently uses Systick and NVIC to perform a non-blocking LED toggle.
+Currently uses Systick and NVIC to perform a non-blocking LED pin state toggle.

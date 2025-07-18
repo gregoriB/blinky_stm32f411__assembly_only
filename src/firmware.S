@@ -30,8 +30,8 @@ Reset_Handler_main:
 
 
 init_vector_table:
-    ldr   r0, =0xE000ED08                           // load address of vtor
-    ldr   r1, =0x08004000                           // load vector table base address
+    ldr   r0, =VTOR                                 // load address of vtor
+    ldr   r1, =MAIN_APP                             // load vector table base address
     str   r1, [r0]                                  // write vector table address to vtor
 
     cpsie I                                         // enable interrupts
@@ -76,7 +76,7 @@ init_clock:
 
     /* setup pll */
     ldr   r1, [r0, #RCC_PLLCRGR_OFFSET]             // rcc_pllcrgr
-    bic   r1, r1, #(BITS_63 << 0)                   // clear pllm
+    bic   r1, r1, #(BITS_6 << 0)                   // clear pllm
     orr   r1, r1, #(16 << 0)                        // set pllm
 
     ldr   r2, =BITS_9

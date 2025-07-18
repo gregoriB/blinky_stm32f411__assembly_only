@@ -149,7 +149,6 @@ led_toggle:
  * The full count must be run 6 times to get a 96Mhz delay before doing an LED toggle
  */
 .type systick_handler, %function
-.global systick_handler
 systick_handler:
     push    {lr}
 
@@ -206,12 +205,10 @@ hang:
     b   hang
 
 
-.global current_iteration_default
 .section .rodata             
 max_iterations:       
-  .word 6               // (96Mhz / 6) == 16Mhz
+    .word 6                                          // (96Mhz / 6) == 16Mhz
 
-.global current_iteration 
 .section .data             
 current_iteration:       
-  .word max_iterations
+    .word max_iterations
